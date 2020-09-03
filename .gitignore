@@ -1,0 +1,7 @@
+/.idea
+/lib
+/target
+src/main/resources/img
+*.properties
+*.log
+*.pdf
