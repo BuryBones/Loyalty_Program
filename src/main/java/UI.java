@@ -236,6 +236,7 @@ public class UI extends JFrame {
         showCreatePanel(false);
 
         revalidate();
+        setVisible(false);
     }
 
     public static UI getInstance() {
@@ -366,12 +367,7 @@ public class UI extends JFrame {
         DBController.getInstance().generateRandomPurchases();
     }
 
-    // asks for login and password
-    public String[] login() {
-        String[] result = new String[2];
-        result[1] = "postgres";
-        result[2] = "admin";
-        // TODO: OptionPane or new frame for login
-        return result;
+    public void showWindow() {
+        setVisible(true);
     }
 }

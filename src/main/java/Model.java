@@ -142,5 +142,4 @@ public class Model {
     public void resetPointsUsing() {
         pointsUsing = 0;
     }
-
 }

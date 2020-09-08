@@ -1,12 +1,12 @@
 public class PointsCalculator {
 
-    private static float multiplier = 0.5f;
+    private float multiplier = 0.5f;
 
-    public static float getMultiplier() {
+    public float getMultiplier() {
         return multiplier;
     }
-    public static void setMultiplier(float multiplier) {
-        PointsCalculator.multiplier = multiplier;
+    public void setMultiplier(float multiplier) {
+        this.multiplier = multiplier;
     }
 
     private static PointsCalculator instance = new PointsCalculator();

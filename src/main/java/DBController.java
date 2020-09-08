@@ -12,19 +12,8 @@ public class DBController {
 
     private static DBController instance = new DBController();
 
-    private DBController(){
-        String[] loginInfo = UI.getInstance().login();
-        setUser(loginInfo[1]);
-        setPassword(loginInfo[2]);
-        logger.info("Connecting... User: " + user + "; Password: " + password);
-        // TODO: while cycle if login info is invalid
-        try {
-            connection = DriverManager.getConnection(url, user, password);
-            logger.info("Connection established!");
-        } catch (SQLException sqlex) {
-            logger.error("DB connection failed! " + sqlex.getMessage());
-            System.out.println("CONNECTION FAILED");
-        }
+    private DBController() {
+
     }
 
     public static DBController getInstance() {
@@ -34,6 +23,20 @@ public class DBController {
         return instance;
     }
 
+    private boolean tryConnect() {
+        logger.info("Connecting... User: " + user + "; Password: " + password);
+        // TODO: while cycle if login info is invalid
+        try {
+            connection = DriverManager.getConnection(url, user, password);
+            logger.info("Connection established!");
+        } catch (SQLException sqlex) {
+            logger.error("DB connection failed! " + sqlex.getMessage());
+            System.out.println("CONNECTION FAILED");
+            return false;
+        }
+        return true;
+    }
+
     private Model model = Model.getInstance();
 
     private String user = "";
@@ -41,11 +44,10 @@ public class DBController {
     private String url = "jdbc:postgresql://localhost:5432/testdb";
     private Connection connection;
 
-    public void setUser(String user) {
+    public boolean connect(String user, String password) {
         this.user = user;
-    }
-    public void setPassword(String password) {
         this.password = password;
+        return tryConnect();
     }
     public void setUrl(String url) {
         this.url = url;
