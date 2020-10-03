@@ -5,8 +5,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class UI extends JFrame {
 
@@ -77,6 +80,7 @@ public class UI extends JFrame {
                     if (findClient()) {
                         showStatusPanel(true);
                         showUpdatePanel(true);
+                        showCreatePanel(false);
                     } else {
                         showStatusPanel(false);
                         showUpdatePanel(false);
@@ -192,7 +196,11 @@ public class UI extends JFrame {
         clientReport.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                clientReport(phone.getText().trim());
+                if(clientReport()) {
+                    JOptionPane.showMessageDialog(UI.getInstance(),"Отчёт по клиенту успешно создан!", "Успешно!", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(UI.getInstance(),"Не удалось создать отчёт!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         JButton generateRandom = new JButton("Сгенерировать рандомные покупки");
@@ -357,11 +365,11 @@ public class UI extends JFrame {
     private boolean dayReport() {
         return PDFCreator.getInstance().createDayReport();
     }
-    private void clientReport(String phone) {
-        // TODO:
-        /*
-        detailed report for chosen client
-         */
+    private boolean clientReport() {
+        // TODO: MVC?!
+        DBController.Interval[] options = DBController.Interval.getValues();
+        int choice = JOptionPane.showOptionDialog(this,"Выберите интервал","Отчёт по клиенту",JOptionPane.DEFAULT_OPTION,JOptionPane.PLAIN_MESSAGE,null,options,0);
+        return PDFCreator.getInstance().createClientReport(options[choice]);
     }
     private void generateRandom() {
         DBController.getInstance().generateRandomPurchases();

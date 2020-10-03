@@ -17,7 +17,7 @@ public class LoginWindow extends JFrame {
     private final JButton log = new JButton("Log in");
 
     LoginWindow () {
-
+        setTitle("Please log in");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         Dimension screen = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
