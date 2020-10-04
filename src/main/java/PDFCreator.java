@@ -4,7 +4,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -24,14 +23,8 @@ public class PDFCreator {
         return instance;
     }
 
-    // TODO: use savePath!
-    private String savePath = "";
-
-    public void setSavePath(String savePath) {
-        this.savePath = savePath;
-    }
-
     public boolean createDayReport() {
+        // TODO: get data here, in case of getting null return false and probably and error message to ui
         try {
             Document doc = new Document();
             Date currentDate = new Date();

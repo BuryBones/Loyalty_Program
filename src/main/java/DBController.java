@@ -1,11 +1,8 @@
 import org.apache.log4j.Logger;
-import org.postgresql.util.PGInterval;
 
 import java.sql.*;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 public class DBController {
 
@@ -52,12 +49,9 @@ public class DBController {
         this.url = url;
     }
 
-    // TODO: probably need to separate methods into
-    //  'find and renew model' and just 'find and get id'
-    //
     public boolean findClient(String phone) {
         try {
-            String query = "SELECT name, points FROM client WHERE phone = ?";
+            String query = "SELECT name, points FROM client WHERE phone = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, phone);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -71,7 +65,8 @@ public class DBController {
                 return true;
             }
         } catch (SQLException sqlEx) {
-            logger.error("Find client error! Phone: " + phone + ";\n message: " + sqlEx.getMessage());
+            logger.error("FIND ERROR! Phone: " + phone + ";\n message: " + sqlEx.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return false;
     }
@@ -82,17 +77,17 @@ public class DBController {
             preparedStatement.setString(1,name);
             preparedStatement.setString(2,phone);
             preparedStatement.execute();
-            logger.info("New client created. Name: " + name + "; phone: " + phone);
+            logger.info("NEW CLIENT Name: " + name + "; phone: " + phone);
             return true;
         } catch (SQLException sqlEx) {
-            logger.info("Failed to create client! Phone: " + phone + "; name: " + name + "\n" + sqlEx.getMessage());
+            logger.info("CREATE ERROR! Phone: " + phone + "; name: " + name + "\n" + sqlEx.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return false;
     }
     public boolean addPoints(String phone, float amount, String receipt) {
         // getting the points from the given sum of purchase
         int points = PointsCalculator.getInstance().convertIntoPoints(amount);
-
         try {
             String query =
                     "UPDATE client SET " +
@@ -105,15 +100,15 @@ public class DBController {
             preparedStatement.setFloat(2,amount);
             preparedStatement.setString(3, phone);
             preparedStatement.execute();
-            logger.info("Phone: " + phone + " points added: " + points);
+            logger.info("Phone: " + phone + " ADDED: " + points + " points");
 
             recordPurchase(receipt,amount,points,phone);
             return true;
         } catch (SQLException sqlEx) {
-            logger.error("Phone: " + phone + " points: " + points + " ADDING FAILED!\n" + sqlEx.getMessage());
+            logger.error("ADDING FAILED! Phone: " + phone + " points: " + points + "\n" + sqlEx.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return false;
-        // TODO: USE RETURNING, return not boolean but actual points!
     }
     public boolean subtractPoints (String phone, float amount, int points, String receipt) {
         if (points <= 0) return false;
@@ -132,13 +127,14 @@ public class DBController {
             preparedStatement.setInt(4,points);
             preparedStatement.setString(5, phone);
             preparedStatement.execute();
-            logger.info("Phone: " + phone + " points used: " + points);
+            logger.info("Phone: " + phone + " USED: " + points + " points");
 
             int negativePoints = ~points + 1;
             recordPurchase(receipt,amount,negativePoints,phone);
             return true;
         } catch (SQLException sqlEx) {
-            logger.error("Phone: " + phone + " points: " + points + " SUBTRACTING FAILED!\n" + sqlEx.getMessage());
+            logger.error("SUBTRACTING FAILED! Phone: " + phone + " points: " + points + "\n" + sqlEx.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return false;
     }
@@ -184,11 +180,12 @@ public class DBController {
             PreparedStatement ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                result = (Integer) rs.getInt("result");
+                result = rs.getInt("result");
             }
+            logger.info("TOTAL USED POINTS TODAY REPORT result = " + result);
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!\n" + e.getMessage());
+            logger.error("ERROR TOTAL USED TODAY\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return result;
     }
@@ -203,14 +200,12 @@ public class DBController {
             PreparedStatement ps = connection.prepareStatement(query,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
             ResultSet rs = ps.executeQuery();
 
-
             int rsSize = 0;
             if (rs != null) {
                 rs.last();
                 rsSize = rs.getRow();
                 rs.beforeFirst();
             }
-            logger.info("Query got " + rsSize + " rows.");
             String[][] result = new String[rsSize][4];
 
             int i = 0;
@@ -221,18 +216,17 @@ public class DBController {
                 result[i][3] = String.valueOf(rs.getInt("purchases"));
                 i++;
             }
+            logger.info("POINTS USED DETAILED REPORT " + result.length + " result rows");
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!");
-            System.out.println(e.getMessage());
+            logger.error("ERROR DETAILED USED TODAY\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
-        // TODO: return null!
         return null;
     }
     public String[][] clientDetailed(String phone, Interval interval) {
-        // TODO: add logging!
         int id = findId(phone);
+        if (id == -1) return null;
         try {
             String query =
                     "SELECT fiscal, amount, points_change, date_trunc('second', time_n_date) " +
@@ -258,14 +252,19 @@ public class DBController {
                 result[i][3] = rs.getTimestamp("date_trunc").toString();
                 i++;
             }
+            logger.info("CLIENT DETAILED REPORT id: " + id + " " + result.length + " result rows");
             return result;
         } catch (SQLException e) {
-            // TODO: EXCEPTION HANDLING!
-            e.printStackTrace();
+            logger.error(
+                    "ERROR CLIENT DETAILED for phone: " + phone + " id: " + id + " interval: " + interval.toString() +
+                    "\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return null;
     }
     public String[][] getAggregateClientData(String phone, Interval interval) {
+        int id = findId(phone);
+        if (id == -1) return null;
         try {
             String query =
                     "SELECT " +
@@ -276,7 +275,7 @@ public class DBController {
                     "FROM purchase WHERE client_id = ? AND " +
                     "time_n_date > now() - CAST (? AS INTERVAL);";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1,findId(phone));
+            ps.setInt(1,id);
             ps.setString(2,interval.getDbValue());
 
             ResultSet rs = ps.executeQuery();
@@ -286,83 +285,98 @@ public class DBController {
             result[0][1] = String.valueOf(rs.getDouble("total_spent"));
             result[0][2] = String.valueOf(rs.getInt("points_gained"));
             result[0][3] = String.valueOf(rs.getInt("points_spent"));
+
+            logger.info("CLIENT DETAILED REPORT id: " + id + " " + result.length + " result rows");
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("ERROR!");
-            e.printStackTrace();
+            logger.error(
+                    "ERROR CLIENT DETAILED AGGREGATE for phone: " + phone + " id: " + id + " interval: " + interval.toString() +
+                            "\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return null;
     }
     public Double getTotalExpendituresOrNull(String phone) {
+        int id = findId(phone);
+        if (id == -1) return null;
         try {
             String query =
                     "SELECT SUM(amount) " +
                     "FROM purchase WHERE client_id = ?;";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1,findId(phone));
+            ps.setInt(1,id);
             ResultSet rs = ps.executeQuery();
             rs.next();
             Double result = rs.getDouble(1);
+            logger.info("TOTAL EXPENDITURES REPORT for phone: " + phone + " id:" + id + " result = " + result);
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!");
-            System.out.println(e.getMessage());
+            logger.error(
+                    "ERROR TOTAL EXPENDITURES for phone: " + phone + " id: " + id + "\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return null;
     }
     public Integer getTotalPointsCollectedOrNull(String phone) {
+        int id = findId(phone);
+        if (id == -1) return null;
         try {
             String query =
                     "SELECT SUM(points_change) FROM purchase " +
                     "WHERE client_id = ? AND points_change > 0;";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1,findId(phone));
+            ps.setInt(1,id);
             ResultSet rs = ps.executeQuery();
             rs.next();
             Integer result = rs.getInt(1);
+            logger.info("TOTAL POINTS COLLECTED REPORT for phone: " + phone + " id:" + id + " result = " + result);
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!");
-            System.out.println(e.getMessage());
+            logger.error(
+                    "ERROR TOTAL POINTS COLLECTED for phone: " + phone + " id: " + id + "\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return null;
     }
     public Integer getTotalPointsUsedOrNull(String phone) {
+        int id = findId(phone);
+        if (id == -1) return null;
         try {
             String query =
                     "SELECT SUM(points_change) FROM purchase " +
                     "WHERE client_id = ? AND points_change < 0;";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1,findId(phone));
+            ps.setInt(1,id);
             ResultSet rs = ps.executeQuery();
             rs.next();
             Integer result = Math.abs(rs.getInt(1));
+            logger.info("TOTAL POINTS USED REPORT for phone: " + phone + " id:" + id + " result = " + result);
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!");
-            System.out.println(e.getMessage());
+            logger.error(
+                    "ERROR TOTAL POINTS USED for phone: " + phone + " id: " + id + "\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return null;
     }
     public Double getAveragePurchaseOrNull(String phone) {
+        int id = findId(phone);
+        if (id == -1) return null;
         try {
             String query =
                     "SELECT AVG(amount) FROM purchase " +
                     "WHERE client_id = ?;";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1,findId(phone));
+            ps.setInt(1,id);
             ResultSet rs = ps.executeQuery();
             rs.next();
             Double result = Math.abs(rs.getDouble(1));
+            logger.info("AVG PURCHASE REPORT for phone: " + phone + " id:" + id + " result = " + result);
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!");
-            System.out.println(e.getMessage());
+            logger.error(
+                    "ERROR AVG PURCHASE for phone: " + phone + " id: " + id + "\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return null;
     }
@@ -377,11 +391,11 @@ public class DBController {
             while (rs.next()) {
                 id = rs.getInt("id");
             }
-            logger.info("ID for phone: " + phone + " is " + id);
         } catch (SQLException sqlEx) {
-            // TODO: exception handling!
-            logger.error("Failed to find ID of a client " + phone + "\n" + sqlEx.getMessage());
+            logger.error("ID ERROR" + phone + "\n" + sqlEx.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
+        logger.info("ID for phone: " + phone + " is " + id);
         return id;
     }
     private void recordPurchase(String fiscalNumber, float amount, int points, String phone) {
@@ -396,9 +410,9 @@ public class DBController {
             ps.execute();
             logger.info("Receipt " + fiscalNumber + "; sum: " + amount + "; recorded.");
         } catch (SQLException sqlEx) {
-            // TODO: exception handling!
             logger.error("Failed to insert a purchase; phone: " + phone + "; id: " +
                     id + "; receipt: " + fiscalNumber + "\n" + sqlEx.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
     }
 
@@ -414,8 +428,7 @@ public class DBController {
             }
             return result;
         } catch (SQLException e) {
-            // TODO: exception handling!
-            System.out.println("EXCEPTION!\n" + e.getMessage());
+            UiController.getInstance().showError("Ошибка выполнения запроса к базе данных!",false);
         }
         return new HashMap<>();
     }

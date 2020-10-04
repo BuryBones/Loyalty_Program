@@ -5,11 +5,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class UI extends JFrame {
 
@@ -375,7 +370,12 @@ public class UI extends JFrame {
         DBController.getInstance().generateRandomPurchases();
     }
 
-    public void showWindow() {
+    public void showError(String text, boolean exit) {
+        JOptionPane.showMessageDialog(this,text,"Error!",JOptionPane.ERROR_MESSAGE);
+        if (exit) System.exit(0);
+    }
+
+    void showWindow() {
         setVisible(true);
     }
 }

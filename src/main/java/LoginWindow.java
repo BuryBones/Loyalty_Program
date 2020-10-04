@@ -7,7 +7,7 @@ public class LoginWindow extends JFrame {
 
     private final LoginWindow thisObject = this;
     private final DBController dbc = DBController.getInstance();
-    private final UI ui = UI.getInstance();
+    private final UiController uic = UiController.getInstance();
 
     private final JLabel loginLabel = new JLabel("Enter login:");
     private final JLabel passwordLabel = new JLabel("Enter password:");
@@ -54,7 +54,7 @@ public class LoginWindow extends JFrame {
         setVisible(true);
     }
     private void closeLoginWindow() {
-        ui.showWindow();
+        uic.showWindow();
         thisObject.dispose();
     }
     private void resetFields() {
