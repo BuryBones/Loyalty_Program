@@ -249,25 +249,6 @@ public class UI extends JFrame {
         return instance;
     }
 
-    // TODO: right place for this method??
-    public int getUsingPnt() {
-        int available = model.getPoints();
-        int wanted = model.getPointsUsing();
-        float purchaseSum = model.getSumOfPurchaseUsing();
-        if (purchaseSum < wanted) {
-            logger.info("Sum of purchase is smaller than using points! Sum: " + purchaseSum + "; points: " + wanted );
-            JOptionPane.showMessageDialog(UI.getInstance(),"Вы хотите списать баллов больше, чем стоимость покупки!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
-            return 0;
-        }
-        if (available < wanted) {
-            logger.info("Insufficient points! Available: " + available + "; wanted: " + wanted);
-            JOptionPane.showMessageDialog(UI.getInstance(),"Недостаточно баллов!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
-            return 0;
-        } else {
-            return wanted;
-        }
-    }
-
     private void setClientName(String name) {
         this.name.setText(name);
     }
@@ -334,7 +315,6 @@ public class UI extends JFrame {
         return false;
     }
     private void addOrUsePoints(boolean add) {
-        // TODO: why result?
         try {
             boolean result;
             if (add) {
@@ -342,11 +322,15 @@ public class UI extends JFrame {
                         .addPoints(model.getPhone(),model.getSumOfPurchaseAdding(),model.getReceiptAdding());
             } else {
                 result = DBController.getInstance()
-                        .subtractPoints(model.getPhone(),model.getSumOfPurchaseUsing(),getUsingPnt(),model.getReceiptUsing());
+                        .subtractPoints(model.getPhone(),model.getSumOfPurchaseUsing(),model.getUsingPoints(),model.getReceiptUsing());
+            }
+            if (!result) {
+                logger.error("FAILED TO DO AN OPERATION WITH POINTS!");
+                JOptionPane.showMessageDialog(UI.getInstance(),"Не удалось провести операцию!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException nfe) {
             JOptionPane.showMessageDialog(UI.getInstance(),"Неправильный формат баллов!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
-            logger.error(nfe.getMessage());
+            logger.error("POINTS INVALID FORMAT\n" + nfe.getMessage());
         } finally {
             resetAdding();
             resetUsing();
@@ -361,8 +345,7 @@ public class UI extends JFrame {
         return PDFCreator.getInstance().createDayReport();
     }
     private boolean clientReport() {
-        // TODO: MVC?!
-        DBController.Interval[] options = DBController.Interval.getValues();
+        Interval[] options = Interval.getValues();
         int choice = JOptionPane.showOptionDialog(this,"Выберите интервал","Отчёт по клиенту",JOptionPane.DEFAULT_OPTION,JOptionPane.PLAIN_MESSAGE,null,options,0);
         return PDFCreator.getInstance().createClientReport(options[choice]);
     }

@@ -1,5 +1,6 @@
 import org.apache.log4j.Logger;
 
+import javax.swing.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,13 +21,23 @@ public class Model {
         return instance;
     }
 
+    // the following fields hold the values shown to user
+
+    // client name
     private String name = "";
+    // client's points available
     private int points = 0;
+    // a phone number searched
     private String phone = "";
+    // a sum of purchase if adding points
     private float sumOfPurchaseAdding = 0;
+    // a sum of purchase if using points
     private float sumOfPurchaseUsing = 0;
+    // a fiscal receipt number, if adding, points, string
     private String receiptAdding = "";
+    // a fiscal receipt number, if using points, string
     private String receiptUsing = "";
+    // how many points trying to use
     private int pointsUsing = 0;
 
     public String getName() {
@@ -50,8 +61,22 @@ public class Model {
     public String getReceiptUsing() {
         return receiptUsing;
     }
-    public int getPointsUsing() {
-        return pointsUsing;
+    public int getUsingPoints() {
+        int available = getPoints();
+        int wanted = pointsUsing;
+        float purchaseSum = getSumOfPurchaseUsing();
+        if (purchaseSum < wanted) {
+            logger.info("Sum of purchase is smaller than using points! Sum: " + purchaseSum + "; points: " + wanted );
+            UiController.getInstance().showError("Вы хотите списать баллов больше, чем стоимость покупки!",false);
+            return 0;
+        }
+        if (available < wanted) {
+            logger.info("Insufficient points! Available: " + available + "; wanted: " + wanted);
+            UiController.getInstance().showError("Недостаточно баллов!",false);
+            return 0;
+        } else {
+            return wanted;
+        }
     }
 
     public boolean setName(String name) {
