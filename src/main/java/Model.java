@@ -23,6 +23,8 @@ public class Model {
 
     // the following fields hold the values shown to user
 
+    // Client object
+    private Client currentClient;
     // client name
     private String name = "";
     // client's points available
@@ -40,6 +42,32 @@ public class Model {
     // how many points trying to use
     private int pointsUsing = 0;
 
+    public void setClient(Client client) {
+        currentClient = client;
+        update();
+    }
+    public Client getCurrentClient() {
+        return currentClient;
+    }
+    public void findClient() {
+
+    }
+    public void createClient() {
+        currentClient = new Client(phone,name);
+        ClientController.getInstance().createClient();
+    }
+    public void updateClient(boolean add) {
+        // TODO: update
+        if (add) {
+            currentClient.setPoints(getPoints() + PointsCalculator.getInstance().convertIntoPoints(getSumOfPurchaseAdding()));
+            // TODO: create new purchase
+        } else {
+            currentClient.setPoints(getPoints() - getUsingPoints());
+            // TODO: create new purchase
+        }
+        // TODO: update other client's field, unless auto done by Postgres
+        ClientController.getInstance().updateClient();
+    }
     public String getName() {
         return name;
     }
@@ -166,5 +194,12 @@ public class Model {
     }
     public void resetPointsUsing() {
         pointsUsing = 0;
+    }
+
+    private void update() {
+        if (currentClient != null) {
+            setName(currentClient.getName());
+            setPoints(currentClient.getPoints());
+        }
     }
 }

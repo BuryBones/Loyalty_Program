@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 public class LoginWindow extends JFrame {
 
     private final LoginWindow thisObject = this;
-    private final DBController dbc = DBController.getInstance();
     private final UiController uic = UiController.getInstance();
 
     private final JLabel loginLabel = new JLabel("Enter login:");
@@ -35,7 +34,10 @@ public class LoginWindow extends JFrame {
         log.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (dbc.connect(login.getText().trim(),password.getText())) {
+                // TODO:
+                if (true) {
+                    HibernateUtil.setUsername(login.getText());
+                    HibernateUtil.setPassword(password.getText());
                     closeLoginWindow();
                 } else {
                     resetFields();

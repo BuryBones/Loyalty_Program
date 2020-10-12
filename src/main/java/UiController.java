@@ -18,5 +18,7 @@ public class UiController {
     void showWindow() {
         ui.showWindow();
     }
-
+    void invokeLogin() {
+        new LoginWindow();
+    }
 }

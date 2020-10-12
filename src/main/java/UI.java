@@ -297,16 +297,8 @@ public class UI extends JFrame {
     private void showCreatePanel(boolean display) {
         createPanel.setVisible(display);
     }
-
-//    private boolean isNumberCorrect() {
-//        String phone = model.getPhone();
-//        Pattern pattern = Pattern.compile("(\\d){11,13}");
-//        Matcher matcher = pattern.matcher(phone);
-//        logger.info("phone number validity check: '" + phone + "' -" + matcher.matches());
-//        return matcher.matches();
-//    }
     private boolean findClient() {
-        if (DBController.getInstance().findClient(model.getPhone())) {
+        if (ClientController.getInstance().findClient()) {
             renewStatus();
             return true;
         } else {
@@ -316,15 +308,9 @@ public class UI extends JFrame {
     }
     private void addOrUsePoints(boolean add) {
         try {
-            boolean result;
-            if (add) {
-                result = DBController.getInstance()
-                        .addPoints(model.getPhone(),model.getSumOfPurchaseAdding(),model.getReceiptAdding());
-            } else {
-                result = DBController.getInstance()
-                        .subtractPoints(model.getPhone(),model.getSumOfPurchaseUsing(),model.getUsingPoints(),model.getReceiptUsing());
-            }
-            if (!result) {
+            model.updateClient(add);
+             // TODO:
+            if (false) {
                 logger.error("FAILED TO DO AN OPERATION WITH POINTS!");
                 JOptionPane.showMessageDialog(UI.getInstance(),"Не удалось провести операцию!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
             }
@@ -339,18 +325,28 @@ public class UI extends JFrame {
         }
     }
     private boolean createClient() {
-        return DBController.getInstance().createClient(model.getName(),model.getPhone());
+        model.createClient();
+        // TODO: do!
+        return true;
     }
     private boolean dayReport() {
-        return PDFCreator.getInstance().createDayReport();
+        // TODO: do
+        JOptionPane.showMessageDialog(this,"Function is disabled.", "Disabled function", JOptionPane.ERROR_MESSAGE);
+//        return PDFCreator.getInstance().createDayReport();
+        return false;
     }
     private boolean clientReport() {
-        Interval[] options = Interval.getValues();
-        int choice = JOptionPane.showOptionDialog(this,"Выберите интервал","Отчёт по клиенту",JOptionPane.DEFAULT_OPTION,JOptionPane.PLAIN_MESSAGE,null,options,0);
-        return PDFCreator.getInstance().createClientReport(options[choice]);
+        // TODO: do
+        JOptionPane.showMessageDialog(this,"Function is disabled.", "Disabled function", JOptionPane.ERROR_MESSAGE);
+//        Interval[] options = Interval.getValues();
+//        int choice = JOptionPane.showOptionDialog(this,"Выберите интервал","Отчёт по клиенту",JOptionPane.DEFAULT_OPTION,JOptionPane.PLAIN_MESSAGE,null,options,0);
+//        return PDFCreator.getInstance().createClientReport(options[choice]);
+        return false;
     }
     private void generateRandom() {
-        DBController.getInstance().generateRandomPurchases();
+        // TODO: do
+        JOptionPane.showMessageDialog(this,"Random purchases generation is disabled.", "Disabled function",JOptionPane.ERROR_MESSAGE);
+//        DBController.getInstance().generateRandomPurchases();
     }
 
     public void showError(String text, boolean exit) {
