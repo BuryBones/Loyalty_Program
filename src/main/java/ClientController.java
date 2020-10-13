@@ -27,6 +27,9 @@ public class ClientController {
                 .uniqueResult();
         Model model = Model.getInstance();
         model.setClient(result);
+        // for development usage
+        System.out.println(result);
+        //
         return result != null;
     }
     public void createClient() {

@@ -1,4 +1,5 @@
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -24,10 +25,10 @@ public class Client {
     private Date registrationDate;
 
     @Column (name = "last_add_date")
-    private Date lastAddDate;
+    private Timestamp lastAddDate;
 
     @Column (name = "last_use_date")
-    private Date lastUseDate;
+    private Timestamp lastUseDate;
 
     @Column (name = "total_spent")
     private Double totalSpent;
@@ -94,7 +95,7 @@ public class Client {
         return lastAddDate;
     }
 
-    public void setLastAddDate(Date lastAddDate) {
+    public void setLastAddDate(Timestamp lastAddDate) {
         this.lastAddDate = lastAddDate;
     }
 
@@ -102,7 +103,7 @@ public class Client {
         return lastUseDate;
     }
 
-    public void setLastUseDate(Date lastUseDate) {
+    public void setLastUseDate(Timestamp lastUseDate) {
         this.lastUseDate = lastUseDate;
     }
 
@@ -110,15 +111,21 @@ public class Client {
         return totalSpent;
     }
 
-    public void setTotalSpent(Double totalSpent) {
-        this.totalSpent = totalSpent;
+    public void increaseTotalSpent(float add) {
+        totalSpent += add;
     }
 
     public Integer getTotalUsed() {
         return totalUsed;
     }
 
-    public void setTotalUsed(Integer totalUsed) {
-        this.totalUsed = totalUsed;
+    public void increaseTotalUsed(Integer add) {
+        totalUsed += add;
+    }
+
+    // for development usage
+    public String toString() {
+        return String.format("%s %d %s %d%nReg: %tF%nLastAdd: %tc%nLastUse: %tc%nTot.Spent: %f%nTot.Used: %d%n",
+                name,id,phone,points,registrationDate,lastAddDate,lastUseDate,totalSpent,totalUsed);
     }
 }

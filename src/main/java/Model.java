@@ -1,6 +1,8 @@
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,15 +59,28 @@ public class Model {
         ClientController.getInstance().createClient();
     }
     public void updateClient(boolean add) {
-        // TODO: update
+        Purchase purchase;
         if (add) {
-            currentClient.setPoints(getPoints() + PointsCalculator.getInstance().convertIntoPoints(getSumOfPurchaseAdding()));
-            // TODO: create new purchase
+            int pointsChange = PointsCalculator.getInstance().convertIntoPoints(getSumOfPurchaseAdding());
+            currentClient.setPoints(getPoints() + pointsChange);
+            currentClient.setLastAddDate(new Timestamp(System.currentTimeMillis()));
+            currentClient.increaseTotalSpent(getSumOfPurchaseAdding());
+            purchase = new Purchase(getReceiptAdding(),getSumOfPurchaseAdding(),pointsChange);
+
         } else {
-            currentClient.setPoints(getPoints() - getUsingPoints());
-            // TODO: create new purchase
+            int usingPoints = getUsingPoints();
+            currentClient.setPoints(getPoints() - usingPoints);
+            currentClient.setLastUseDate(new Timestamp(System.currentTimeMillis()));
+            // Total spent increases by amount payed by money
+            currentClient.increaseTotalSpent(getSumOfPurchaseUsing()-usingPoints);
+            currentClient.increaseTotalUsed(usingPoints);
+            int pointsChange = -usingPoints;
+            purchase = new Purchase(getReceiptUsing(),getSumOfPurchaseUsing(),pointsChange);
         }
-        // TODO: update other client's field, unless auto done by Postgres
+        // TODO: save purchase
+        PurchaseController.getInstance().savePurchase(purchase);
+        System.out.println(purchase);
+
         ClientController.getInstance().updateClient();
     }
     public String getName() {
