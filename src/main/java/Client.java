@@ -125,7 +125,7 @@ public class Client {
 
     // for development usage
     public String toString() {
-        return String.format("%s %d %s %d%nReg: %tF%nLastAdd: %tc%nLastUse: %tc%nTot.Spent: %f%nTot.Used: %d%n",
+        return String.format("%s #%d tel: %s pts: %d%nReg: %tF%nLastAdd: %tc%nLastUse: %tc%nTot.Spent: %f%nTot.Used: %d%n",
                 name,id,phone,points,registrationDate,lastAddDate,lastUseDate,totalSpent,totalUsed);
     }
 }

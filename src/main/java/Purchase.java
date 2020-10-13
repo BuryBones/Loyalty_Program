@@ -27,10 +27,11 @@ public class Purchase {
 
     public Purchase() {
     }
-    public Purchase(String fiscal, float amount, int pointsChange) {
+    public Purchase(String fiscal, float amount, int pointsChange, Client client) {
         this.fiscal = fiscal;
         this.amount = amount;
         this.pointsChange = pointsChange;
+        this.client = client;
         timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -80,6 +81,6 @@ public class Purchase {
 
     // for development usage
     public String toString() {
-        return String.format("Purchase %d %f RUB, %d points %tc", id,amount,pointsChange,timestamp);
+        return String.format("Purchase %d %f RUB, %d points %tc%n", id,amount,pointsChange,timestamp);
     }
 }

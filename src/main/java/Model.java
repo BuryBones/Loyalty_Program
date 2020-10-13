@@ -65,7 +65,7 @@ public class Model {
             currentClient.setPoints(getPoints() + pointsChange);
             currentClient.setLastAddDate(new Timestamp(System.currentTimeMillis()));
             currentClient.increaseTotalSpent(getSumOfPurchaseAdding());
-            purchase = new Purchase(getReceiptAdding(),getSumOfPurchaseAdding(),pointsChange);
+            purchase = new Purchase(getReceiptAdding(),getSumOfPurchaseAdding(),pointsChange,currentClient);
 
         } else {
             int usingPoints = getUsingPoints();
@@ -75,7 +75,7 @@ public class Model {
             currentClient.increaseTotalSpent(getSumOfPurchaseUsing()-usingPoints);
             currentClient.increaseTotalUsed(usingPoints);
             int pointsChange = -usingPoints;
-            purchase = new Purchase(getReceiptUsing(),getSumOfPurchaseUsing(),pointsChange);
+            purchase = new Purchase(getReceiptUsing(),getSumOfPurchaseUsing(),pointsChange,currentClient);
         }
         // TODO: save purchase
         PurchaseController.getInstance().savePurchase(purchase);
