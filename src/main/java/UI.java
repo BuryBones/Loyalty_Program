@@ -308,6 +308,7 @@ public class UI extends JFrame {
     }
     private void addOrUsePoints(boolean add) {
         try {
+            // TODO: if insufficient points - program continues!
             model.updateClient(add);
              // TODO:
             if (false) {
@@ -331,7 +332,19 @@ public class UI extends JFrame {
     }
     private boolean dayReport() {
         // TODO: do
-        JOptionPane.showMessageDialog(this,"Function is disabled.", "Disabled function", JOptionPane.ERROR_MESSAGE);
+//        JOptionPane.showMessageDialog(this,"Function is disabled.", "Disabled function", JOptionPane.ERROR_MESSAGE);
+//        for (Purchase p : PurchaseController.getInstance().getTodayPurchases()) {
+//            System.out.println(p);
+//        }
+        java.util.List<Purchase> purchases = PurchaseController.getInstance().getTodayPurchases();
+        DayReportRow.startNewReport();
+        for (Purchase p : purchases) {
+            DayReportRow.addNewRow(p);
+        }
+        for (DayReportRow row : DayReportRow.getRows()) {
+            System.out.println(row);
+        }
+
 //        return PDFCreator.getInstance().createDayReport();
         return false;
     }
